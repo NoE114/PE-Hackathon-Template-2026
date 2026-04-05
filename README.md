@@ -10,7 +10,7 @@ You need to work with around the seed files that you can find in [MLH PE Hackath
 
 ## Prerequisites
 
-- **uv** — a fast Python package manager that handles Python versions, virtual environments, and dependencies automatically.
+- **uv** — a fast Python package manager that handles Python versions, virtual environments, and dependencies automatically (local dev only).
   Install it with:
   ```bash
   # macOS / Linux
@@ -20,7 +20,8 @@ You need to work with around the seed files that you can find in [MLH PE Hackath
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
   For other methods see the [uv installation docs](https://docs.astral.sh/uv/getting-started/installation/).
-- PostgreSQL running locally (you can use Docker or a local instance)
+- PostgreSQL running locally (local dev only)
+- Docker Desktop **or** Podman (for containerized dev)
 
 ## uv Basics
 
@@ -33,7 +34,7 @@ You need to work with around the seed files that you can find in [MLH PE Hackath
 | `uv add <package>` | Add a new dependency |
 | `uv remove <package>` | Remove a dependency |
 
-## Quick Start
+## Quick Start (Local)
 
 ```bash
 # 1. Clone the repo
@@ -55,6 +56,45 @@ uv run run.py
 curl http://localhost:5000/health
 # → {"status":"ok"}
 ```
+
+## Quick Start (Docker / Podman)
+
+This path is for teammates who do **not** have Python or PostgreSQL installed locally.
+
+```bash
+# 1. Clone the repo
+git clone <repo-url> && cd mlh-pe-hackathon
+
+# 2. Configure environment for containers
+cp .env.example .env
+# Set DATABASE_HOST=db (the service name from compose)
+
+# 3. Build and run (choose one)
+docker compose up --build
+# or
+podman compose up --build
+
+# 4. Verify
+curl http://localhost:5000/health
+# → {"status":"ok"}
+
+# 4. To stop
+docker compose down
+# or
+podman compose down
+
+# 4. To reopen
+docker compose up
+# or
+podman compose up
+```
+
+Notes:
+- `DATABASE_HOST` must be `db` when running via compose.
+- Containers expose port 5000 on your machine.
+- Podman users: unqualified image names can fail; this repo uses a fully qualified Postgres image to avoid registry config issues.
+- The container sets `APP_HOST=0.0.0.0` so Flask is reachable at `http://localhost:5000`.
+- The compose file also forces `DATABASE_HOST=db` so the app connects to the containerized Postgres even if your `.env` is set for local dev.
 
 ## Project Structure
 
